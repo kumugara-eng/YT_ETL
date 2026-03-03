@@ -57,7 +57,41 @@ def get_video_ids(playlist_Id):
 
     except requests.exceptions.RequestException as e:
         raise e
+    
+def batch_list(video_id_lst, batch_size=50):
+    for i in range(0, len(video_id_lst), batch_size):
+        yield video_id_lst[i:i + batch_size]
+
+
+
+def extract_video_details(video_id_lst):
+
+    video_details = []
+    for batch in batch_list(video_id_lst):
+        ids = ",".join(batch)
+        url = f"https://youtube.googleapis.com/youtube/v3/videos?part=contentDetails&part=snippet&part=statistics&id={ids}&key={API_KEY}"
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Check if the request was successful
+            data = response.json()
+            for item in data["items"]:
+                video_details.append({
+                    "videoId": item["id"],
+                    "title": item["snippet"]["title"],
+                    "publishedAt": item["snippet"]["publishedAt"],
+                    "duration": item["contentDetails"]["duration"],
+                    "viewCount": item["statistics"].get("viewCount", 0),
+                    "likeCount": item["statistics"].get("likeCount", 0),
+                    "commentCount": item["statistics"].get("commentCount", 0)
+                })
+            video_details.extend(data["items"])
+        except requests.exceptions.RequestException as e:
+            raise e
+    print(f"Total Video Details Retrieved: {len(video_details)}")
+    return video_details
 
 if __name__ == "__main__":
     playlist_Id=get_playlist_id()
-    get_video_ids(playlist_Id)
+    video_id=get_video_ids(playlist_Id)
+    print(extract_video_details(video_id))
+   
