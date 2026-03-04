@@ -2,6 +2,8 @@ import requests
 import json
 import os
 from dotenv import load_dotenv
+from datetime import date
+
 
 
 load_dotenv(dotenv_path="./.env")
@@ -90,8 +92,16 @@ def extract_video_details(video_id_lst):
     print(f"Total Video Details Retrieved: {len(video_details)}")
     return video_details
 
+
+def save_to_json(data, filename="video_details.json"):
+    file_path = f'./data/YT_data_{date.today()}.json'
+    with open(file_path, 'w',encoding='utf-8') as f:
+        json.dump(data, f, indent=4,ensure_ascii=False)
+
+
+
 if __name__ == "__main__":
     playlist_Id=get_playlist_id()
     video_id=get_video_ids(playlist_Id)
-    print(extract_video_details(video_id))
-   
+    video_data=extract_video_details(video_id)
+    save_to_json(video_data)
