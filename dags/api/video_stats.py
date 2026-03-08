@@ -3,15 +3,25 @@ import json
 import os
 from dotenv import load_dotenv
 from datetime import date
-
+from airflow.decorators import  task
+from airflow.models import Variable
 
 
 load_dotenv(dotenv_path="./.env")
 
-API_KEY = os.getenv("API_KEY")
-CHANNEL_HANDLE = "MrBeast"
+API_KEY = Variable.get("API_KEY")
+CHANNEL_HANDLE = Variable.get("CHANNEL_HANDLE")
 maxResults = 50
+'''
 
+
+this script retrieves video details from a specified YouTube channel 
+using the YouTube Data API v3. It performs the following steps:
+'''
+
+
+
+@task()
 def get_playlist_id():
 
     try:
@@ -30,7 +40,7 @@ def get_playlist_id():
         raise e
     
 
-
+@task()
 def get_video_ids(playlist_Id):
 
     
@@ -60,15 +70,17 @@ def get_video_ids(playlist_Id):
     except requests.exceptions.RequestException as e:
         raise e
     
-def batch_list(video_id_lst, batch_size=50):
-    for i in range(0, len(video_id_lst), batch_size):
-        yield video_id_lst[i:i + batch_size]
 
 
-
+@task()
 def extract_video_details(video_id_lst):
 
     video_details = []
+
+    def batch_list(video_id_lst, batch_size=50):
+        for i in range(0, len(video_id_lst), batch_size):
+            yield video_id_lst[i:i + batch_size]
+
     for batch in batch_list(video_id_lst):
         ids = ",".join(batch)
         url = f"https://youtube.googleapis.com/youtube/v3/videos?part=contentDetails&part=snippet&part=statistics&id={ids}&key={API_KEY}"
@@ -92,7 +104,7 @@ def extract_video_details(video_id_lst):
     print(f"Total Video Details Retrieved: {len(video_details)}")
     return video_details
 
-
+@task()
 def save_to_json(data, filename="video_details.json"):
     file_path = f'./data/YT_data_{date.today()}.json'
     with open(file_path, 'w',encoding='utf-8') as f:
