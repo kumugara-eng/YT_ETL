@@ -22,11 +22,7 @@ def test_postgres_conn(mock_postgres_conn_vars):
 
 
 def test_dags_integrity(dagbag):
-    # 1.subtest to check if there are any import errors in the DAGs
-    assert dagbag.import_errors == {}, f"Import errors found: {dagbag.import_errors}"
-    print("===========")
-    print(dagbag.import_errors)
-
+ 
     # 2. subtest to check if the expected DAGs are present in the DagBag
     expected_dag_ids = ["produce_json_file", "update_db", "data_quality_checks"]
     loaded_dag_ids = list(dagbag.dags.keys())

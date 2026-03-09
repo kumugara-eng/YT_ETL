@@ -4,6 +4,10 @@ import psycopg2
 from unittest import mock
 from airflow.models import Variable, Connection, DagBag
 
+import sys
+from pathlib import Path
+
+
 
 @pytest.fixture
 def api_key():
@@ -40,7 +44,8 @@ def mock_postgres_conn_vars():
 def dagbag():
     yield DagBag()
 
-
+# this is now for integration tests, where we want to test the 
+# actual connection to the database and the API
 @pytest.fixture()
 def airflow_variable():
     def get_airflow_variable(variable_name):
