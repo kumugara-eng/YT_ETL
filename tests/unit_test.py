@@ -44,8 +44,8 @@ def test_dags_integrity(dagbag):
     # 4. subtest to check the number of tasks in each DAG
 
     expected_task_counts = {
-        "produce_json_file": 4,
-        "update_db": 2,
+        "produce_json_file": 5,
+        "update_db": 3,
         "data_quality_checks": 2,
     }
     print("===========")
